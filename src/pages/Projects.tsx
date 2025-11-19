@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { KanbanCard } from "@/components/KanbanCard";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { projectService } from "@/services/project.service";
+import { useToast } from "@/hooks/use-toast";
+import { AddTodoModal } from "@/components/AddTodoModal";
 import {
   DndContext,
   DragEndEvent,
@@ -28,85 +31,6 @@ type Task = {
   columnId: string;
 };
 
-const initialTasks: Task[] = [
-  {
-    id: "1",
-    title: "Project details: Movie Industry Presentation for Business Class",
-    category: "Information",
-    priority: "medium",
-    dueDate: "Today",
-    columnId: "information",
-  },
-  {
-    id: "2",
-    title: "Teacher Details: Contact Ms. Auris if you have any project issues",
-    category: "Information",
-    priority: "high",
-    dueDate: "Today",
-    columnId: "information",
-  },
-  {
-    id: "3",
-    title: "Set up shared file management (Google Document, Dropbox, etc)",
-    category: "Planning",
-    priority: "high",
-    dueDate: "Today",
-    subtasks: { completed: 0, total: 4 },
-    comments: 5,
-    assignee: { name: "John Doe" },
-    columnId: "planning",
-  },
-  {
-    id: "4",
-    title: "Set up shared communication tool (Whatsapp, Email, etc)",
-    category: "Planning",
-    priority: "medium",
-    dueDate: "Today",
-    comments: 2,
-    assignee: { name: "Jane Smith" },
-    columnId: "planning",
-  },
-  {
-    id: "5",
-    title: "Select which topic to present: Disney Movie Studio Analysis",
-    category: "Project Task",
-    priority: "medium",
-    dueDate: "Tomorrow",
-    assignee: { name: "Mike Johnson" },
-    columnId: "tasks",
-  },
-  {
-    id: "6",
-    title: "Write script for presentation",
-    category: "Project Task",
-    priority: "high",
-    dueDate: "Tomorrow",
-    subtasks: { completed: 4, total: 4 },
-    assignee: { name: "Sarah Williams" },
-    columnId: "tasks",
-  },
-  {
-    id: "7",
-    title: "Brainstorm meeting",
-    category: "Meetings",
-    priority: "low",
-    dueDate: "Today",
-    comments: 2,
-    assignee: { name: "Alex Brown" },
-    columnId: "meetings",
-  },
-  {
-    id: "8",
-    title: "Writing meeting",
-    category: "Meetings",
-    priority: "low",
-    dueDate: "12 Jun",
-    comments: 3,
-    assignee: { name: "Emily Davis" },
-    columnId: "meetings",
-  },
-];
-
 const columns = [
   { id: "information", title: "Information", color: "bg-warning" },
   { id: "planning", title: "Planning", color: "bg-warning" },
@@ -115,8 +39,32 @@ const columns = [
 ];
 
 export default function Projects() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      const response = await projectService.getProjects();
+      // Note: You'll need to adapt the project data to match the Task type
+      setTasks([]);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to load projects",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -158,7 +106,7 @@ export default function Projects() {
     <div className="flex min-h-screen bg-background">
       <AppSidebar />
 
-      <main className="flex-1 overflow-x-auto">
+      <main className="flex-1 overflow-x-auto ml-64">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -179,7 +127,7 @@ export default function Projects() {
               <Button variant="outline" size="icon">
                 <Filter className="w-4 h-4" />
               </Button>
-              <Button>
+              <Button onClick={() => setModalOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 New task
               </Button>
@@ -187,48 +135,61 @@ export default function Projects() {
           </div>
 
           {/* Kanban Board */}
-          <DndContext
-            sensors={sensors}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          >
-            <div className="flex gap-4 pb-6">
-              {columns.map((column) => (
-                <div key={column.id} className="flex-shrink-0 w-80">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h2 className="font-semibold text-foreground">{column.title}</h2>
-                    <span
-                      className={`${column.color} text-white text-xs font-medium px-2 py-0.5 rounded-full`}
-                    >
-                      {getTasksForColumn(column.id).length}
-                    </span>
-                  </div>
-
-                  <SortableContext
-                    items={getTasksForColumn(column.id).map((t) => t.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="space-y-3 min-h-[200px]">
-                      {getTasksForColumn(column.id).map((task) => (
-                        <KanbanCard key={task.id} {...task} />
-                      ))}
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading projects...</div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="flex gap-4 pb-6">
+                {columns.map((column) => (
+                  <div key={column.id} className="flex-shrink-0 w-80">
+                    <div className="flex items-center gap-2 mb-4">
+                      <h2 className="font-semibold text-foreground">{column.title}</h2>
+                      <span
+                        className={`${column.color} text-white text-xs font-medium px-2 py-0.5 rounded-full`}
+                      >
+                        {getTasksForColumn(column.id).length}
+                      </span>
                     </div>
-                  </SortableContext>
 
-                  <Button variant="ghost" className="w-full mt-3" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add task
-                  </Button>
-                </div>
-              ))}
-            </div>
+                    <SortableContext
+                      items={getTasksForColumn(column.id).map((t) => t.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-3 min-h-[200px]">
+                        {getTasksForColumn(column.id).map((task) => (
+                          <KanbanCard key={task.id} {...task} />
+                        ))}
+                      </div>
+                    </SortableContext>
 
-            <DragOverlay>
-              {activeTask && <KanbanCard {...activeTask} />}
-            </DragOverlay>
-          </DndContext>
+                    <Button variant="ghost" className="w-full mt-3" size="sm">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add task
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              <DragOverlay>
+                {activeTask && <KanbanCard {...activeTask} />}
+              </DragOverlay>
+            </DndContext>
+          )}
         </div>
       </main>
+      
+      <AddTodoModal 
+        open={modalOpen} 
+        onOpenChange={setModalOpen}
+        onSuccess={() => {
+          setModalOpen(false);
+          loadProjects();
+        }}
+      />
     </div>
   );
 }

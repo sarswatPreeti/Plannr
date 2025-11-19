@@ -1,85 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { TodoCard } from "@/components/TodoCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AddTodoModal } from "@/components/AddTodoModal";
-
-const mockTodos = [
-  {
-    id: "1",
-    title: "Promotion banner",
-    category: "GoPay",
-    dueDate: new Date(),
-    icon: "📢",
-    completed: false,
-  },
-  {
-    id: "2",
-    title: "Daily workout",
-    category: "Personal",
-    dueDate: new Date(),
-    icon: "🏋️",
-    completed: false,
-  },
-  {
-    id: "3",
-    title: "Make Dribbble shoot",
-    category: "Kretya Studio",
-    dueDate: new Date(Date.now() + 86400000),
-    icon: "🏀",
-    completed: false,
-  },
-  {
-    id: "4",
-    title: "Announcement of Kretya Design Challenge #1",
-    category: "Kretya Studio",
-    dueDate: new Date(Date.now() + 86400000),
-    icon: "📢",
-    completed: false,
-  },
-  {
-    id: "5",
-    title: "Buy LED Strips",
-    category: "Personal",
-    dueDate: new Date(Date.now() + 172800000),
-    icon: "💡",
-    completed: false,
-  },
-  {
-    id: "6",
-    title: "Pull to refresh at promo discovery",
-    category: "GoPay",
-    dueDate: new Date(Date.now() + 259200000),
-    icon: "📱",
-    completed: false,
-  },
-  {
-    id: "7",
-    title: "Edit video for social media",
-    category: "Content Dump",
-    dueDate: new Date(Date.now() + 259200000),
-    icon: "🎥",
-    completed: false,
-  },
-  {
-    id: "8",
-    title: "Make mood-board for new office interior",
-    category: "Content Dump",
-    dueDate: new Date(Date.now() + 259200000),
-    icon: "🎨",
-    completed: false,
-  },
-];
+import { todoService } from "@/services/todo.service";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Today() {
-  const [todos, setTodos] = useState(mockTodos);
+  const [todos, setTodos] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const handleToggle = (id: string) => {
-    setTodos(todos.map(todo => 
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
+  useEffect(() => {
+    loadTodos();
+  }, []);
+
+  const loadTodos = async () => {
+    try {
+      setLoading(true);
+      const today = new Date().toISOString().split('T')[0];
+      const response = await todoService.getTodos({ dueDate: today });
+      setTodos(response.data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to load todos",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggle = async (id: string) => {
+    try {
+      await todoService.toggleTodo(id);
+      setTodos(todos.map(todo => 
+        todo._id === id ? { ...todo, completed: !todo.completed } : todo
+      ));
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to update todo",
+        variant: "destructive",
+      });
+    }
   };
 
   const currentDate = new Date().toLocaleDateString("en-US", {
@@ -91,22 +58,34 @@ export default function Today() {
     <div className="flex min-h-screen bg-background">
       <AppSidebar />
       
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto ml-64">
         <div className="max-w-4xl mx-auto p-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">My Day</h1>
             <p className="text-muted-foreground">{currentDate}</p>
           </div>
 
-          <div className="space-y-2 mb-6">
-            {todos.map((todo) => (
-              <TodoCard
-                key={todo.id}
-                {...todo}
-                onToggle={handleToggle}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading todos...</div>
+          ) : todos.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No todos for today</div>
+          ) : (
+            <div className="space-y-2 mb-6">
+              {todos.map((todo) => (
+                <TodoCard
+                  key={todo._id}
+                  id={todo._id}
+                  title={todo.title}
+                  category={todo.project?.name || 'Personal'}
+                  dueDate={new Date(todo.dueDate)}
+                  description={todo.description}
+                  icon="📋"
+                  completed={todo.completed}
+                  onToggle={handleToggle}
+                />
+              ))}
+            </div>
+          )}
 
           <Button 
             onClick={() => setModalOpen(true)}
@@ -122,6 +101,7 @@ export default function Today() {
       <AddTodoModal 
         open={modalOpen}
         onOpenChange={setModalOpen}
+        onSuccess={loadTodos}
       />
     </div>
   );

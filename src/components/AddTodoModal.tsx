@@ -23,36 +23,57 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { todoService } from "@/services/todo.service";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddTodoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave?: (todo: any) => void;
+  onSuccess?: () => void;
 }
 
-export function AddTodoModal({ open, onOpenChange, onSave }: AddTodoModalProps) {
+export function AddTodoModal({ open, onOpenChange, onSuccess }: AddTodoModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<string>("medium");
   const [dueDate, setDueDate] = useState<Date>();
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title) return;
 
-    onSave?.({
-      title,
-      description,
-      priority,
-      dueDate,
-      completed: false,
-    });
+    try {
+      setSaving(true);
+      await todoService.createTodo({
+        title,
+        description,
+        priority: priority as 'low' | 'medium' | 'high',
+        dueDate: dueDate ? dueDate.toISOString() : new Date().toISOString(),
+        completed: false,
+      });
 
-    // Reset form
-    setTitle("");
-    setDescription("");
-    setPriority("medium");
-    setDueDate(undefined);
-    onOpenChange(false);
+      toast({
+        title: "Success",
+        description: "Todo created successfully",
+      });
+
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setPriority("medium");
+      setDueDate(undefined);
+      onOpenChange(false);
+      onSuccess?.();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to create todo",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -131,11 +152,11 @@ export function AddTodoModal({ open, onOpenChange, onSave }: AddTodoModalProps) 
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={!title}>
-            Create Task
+          <Button onClick={handleSave} disabled={!title || saving}>
+            {saving ? "Creating..." : "Create Task"}
           </Button>
         </DialogFooter>
       </DialogContent>
