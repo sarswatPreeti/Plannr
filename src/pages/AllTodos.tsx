@@ -50,7 +50,7 @@ export default function AllTodos() {
       const mappedTodos = response.data?.map((todo: any) => ({
         id: todo._id,
         name: todo.title,
-        client: todo.project?.name || 'Personal',
+        client: todo.category || 'Personal',
         description: todo.description || '',
         deadline: new Date(todo.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
         people: [{ name: 'User' }],
