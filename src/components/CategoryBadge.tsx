@@ -6,10 +6,14 @@ interface CategoryBadgeProps {
 }
 
 const categoryColors: Record<string, string> = {
-  personal: "bg-category-personal/10 text-category-personal border-category-personal/20",
-  work: "bg-category-work/10 text-category-work border-category-work/20",
-  project: "bg-category-project/10 text-category-project border-category-project/20",
-  default: "bg-muted text-muted-foreground border-border",
+  personal: "bg-blue-50 text-blue-600 border-blue-200",
+  work: "bg-purple-50 text-purple-600 border-purple-200",
+  study: "bg-green-50 text-green-600 border-green-200",
+  health: "bg-pink-50 text-pink-600 border-pink-200",
+  shopping: "bg-orange-50 text-orange-600 border-orange-200",
+  other: "bg-gray-50 text-gray-600 border-gray-200",
+  project: "bg-indigo-50 text-indigo-600 border-indigo-200",
+  default: "bg-slate-50 text-slate-600 border-slate-200",
 };
 
 export function CategoryBadge({ category, className }: CategoryBadgeProps) {
