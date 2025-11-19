@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import { KanbanCard } from "@/components/KanbanCard";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,7 @@ function DroppableColumn({
 }
 
 export default function Projects() {
+  const { projectId } = useParams();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -77,12 +79,17 @@ export default function Projects() {
   }, []);
 
   useEffect(() => {
-    if (selectedProject) {
-      loadProjectTasks(selectedProject._id);
-    } else if (projects.length > 0) {
+    if (projectId && projects.length > 0) {
+      const project = projects.find(p => p._id === projectId);
+      if (project) {
+        setSelectedProject(project);
+        loadProjectTasks(project._id);
+      }
+    } else if (projects.length > 0 && !selectedProject) {
       setSelectedProject(projects[0]);
+      loadProjectTasks(projects[0]._id);
     }
-  }, [selectedProject, projects]);
+  }, [projectId, projects]);
 
   const loadProjects = async () => {
     try {
@@ -113,18 +120,19 @@ export default function Projects() {
       const response = await todoService.getTodos({ projectId });
       const todos = response.data || [];
       
+      // Get saved column mappings from localStorage
+      const savedMappings = localStorage.getItem(`project-${projectId}-columns`);
+      const columnMappings = savedMappings ? JSON.parse(savedMappings) : {};
+      
       const mappedTasks: Task[] = todos.map((todo) => {
-        // Use tags array to store project column, or default based on status
-        let columnId = 'information';
+        // Use saved column mapping or default based on status
+        let columnId = columnMappings[todo._id];
         
-        // Check if task has a projectColumn tag
-        const projectColumnTag = todo.tags?.find(tag => tag.startsWith('projectColumn:'));
-        if (projectColumnTag) {
-          columnId = projectColumnTag.replace('projectColumn:', '');
-        } else {
-          // Fallback: distribute tasks based on category or default to information
-          if (todo.category === 'Work') columnId = 'planning';
-          else if (todo.category === 'Project') columnId = 'project-tasks';
+        if (!columnId) {
+          // Default distribution based on status
+          if (todo.status === 'todo') columnId = 'information';
+          else if (todo.status === 'in-progress') columnId = 'planning';
+          else if (todo.status === 'completed') columnId = 'meetings';
           else columnId = 'information';
         }
         
@@ -225,32 +233,38 @@ export default function Projects() {
       if (!targetColumn) return;
       
       // Optimistically update UI
+      const previousTasks = [...tasks];
       setTasks(
         tasks.map((task) =>
           task._id === active.id ? { ...task, columnId: targetColumnId!, status: targetColumn.status, projectColumn: targetColumnId! } : task
         )
       );
       
-      // Update in backend - save column in tags array
+      // Update in backend - only update status
       try {
-        // Remove old projectColumn tag and add new one
-        const updatedTags = [...(activeTask.tags || []).filter(tag => !tag.startsWith('projectColumn:'))];
-        updatedTags.push(`projectColumn:${targetColumnId}`);
+        // Save column mapping to localStorage
+        if (selectedProject) {
+          const savedMappings = localStorage.getItem(`project-${selectedProject._id}-columns`);
+          const columnMappings = savedMappings ? JSON.parse(savedMappings) : {};
+          columnMappings[activeTask._id] = targetColumnId;
+          localStorage.setItem(`project-${selectedProject._id}-columns`, JSON.stringify(columnMappings));
+        }
         
+        // Only update the status field
         await todoService.updateTodo(activeTask._id, { 
-          status: targetColumn.status,
-          tags: updatedTags
+          status: targetColumn.status
+        });
+        
+        toast({
+          title: "Success",
+          description: `Task moved to ${targetColumn.title}`,
         });
       } catch (error: any) {
         // Revert on error
-        setTasks(
-          tasks.map((task) =>
-            task._id === active.id ? { ...task, columnId: activeTask.columnId, status: activeTask.status, projectColumn: activeTask.projectColumn } : task
-          )
-        );
+        setTasks(previousTasks);
         toast({
           title: "Error",
-          description: "Failed to update task status",
+          description: error.response?.data?.message || "Failed to update task status",
           variant: "destructive",
         });
       }

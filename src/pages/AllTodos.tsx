@@ -175,7 +175,7 @@ export default function AllTodos() {
         deadline: new Date(todo.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
         people: [{ name: 'User' }],
         priority: todo.priority || 'medium',
-        status: todo.completed ? 'completed' : (todo.status || 'todo'),
+        status: todo.status || 'todo', // Use the status field directly from backend
       })) || [];
       setTodos(mappedTodos);
     } catch (error: any) {
@@ -249,21 +249,39 @@ export default function AllTodos() {
     if (targetSection) {
       // Dropped on section - change status
       if (activeTodo.status !== targetSection.id) {
+        // Optimistically update UI
+        const previousTodos = [...todos];
         setTodos(prev => prev.map(t => 
           t.id === activeId ? { ...t, status: targetSection.id as any } : t
         ));
 
         try {
-          await todoService.updateTodo(activeId, { status: targetSection.id });
+          console.log('Updating task:', activeId, 'to status:', targetSection.id);
+          // Get the full todo from backend to preserve its data
+          const fullTodo = await todoService.getTodo(activeId);
+          
+          // Filter out projectColumn tags and keep real tags
+          const cleanTags = (fullTodo.data.tags || []).filter(tag => !tag.startsWith('projectColumn:'));
+          
+          // Update with clean tags
+          const updatePayload = { 
+            status: targetSection.id as 'todo' | 'in-progress' | 'completed',
+            tags: cleanTags // Send empty array or cleaned tags
+          };
+          console.log('Update payload:', updatePayload);
+          const result = await todoService.updateTodo(activeId, updatePayload);
+          console.log('Update successful:', result);
           toast({
             title: "Success",
             description: `Task moved to ${targetSection.title}`,
           });
         } catch (error: any) {
-          loadTodos();
+          console.error('Update failed:', error.response?.data || error.message);
+          // Revert on error
+          setTodos(previousTodos);
           toast({
             title: "Error",
-            description: "Failed to update task",
+            description: error.response?.data?.message || error.message || "Failed to update task status",
             variant: "destructive",
           });
         }
@@ -289,21 +307,38 @@ export default function AllTodos() {
           }
         } else {
           // Move to different section
+          const previousTodos = [...todos];
           setTodos(prev => prev.map(t => 
             t.id === activeId ? { ...t, status: overTodo.status } : t
           ));
 
           try {
-            await todoService.updateTodo(activeId, { status: overTodo.status });
+            console.log('Updating task:', activeId, 'to status:', overTodo.status);
+            // Get the full todo from backend to preserve its data
+            const fullTodo = await todoService.getTodo(activeId);
+            
+            // Filter out projectColumn tags and keep real tags
+            const cleanTags = (fullTodo.data.tags || []).filter(tag => !tag.startsWith('projectColumn:'));
+            
+            // Update with clean tags
+            const updatePayload = { 
+              status: overTodo.status as 'todo' | 'in-progress' | 'completed',
+              tags: cleanTags
+            };
+            console.log('Update payload:', updatePayload);
+            const result = await todoService.updateTodo(activeId, updatePayload);
+            console.log('Update successful:', result);
             toast({
               title: "Success",
               description: `Task moved to ${sections.find(s => s.id === overTodo.status)?.title}`,
             });
           } catch (error: any) {
-            loadTodos();
+            console.error('Update failed:', error.response?.data || error.message);
+            // Revert on error
+            setTodos(previousTodos);
             toast({
               title: "Error",
-              description: "Failed to update task",
+              description: error.response?.data?.message || error.message || "Failed to update task status",
               variant: "destructive",
             });
           }

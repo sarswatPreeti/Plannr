@@ -95,7 +95,7 @@ export function AddTodoModal({ open, onOpenChange, onSuccess, defaultDate, editi
         dueDate: finalDate.toISOString(),
         completed: editingTodo?.completed || false,
         status: editingTodo?.status || defaultStatus || 'todo',
-        tags: projectColumn ? [`projectColumn:${projectColumn}`] : [],
+        tags: [], // Don't use tags for projectColumn - it causes validation errors
         ...(projectId && { projectId }),
       };
 
@@ -106,7 +106,16 @@ export function AddTodoModal({ open, onOpenChange, onSuccess, defaultDate, editi
           description: "Todo updated successfully",
         });
       } else {
-        await todoService.createTodo(todoData);
+        const result = await todoService.createTodo(todoData);
+        
+        // Save column mapping to localStorage if creating in Projects page
+        if (projectColumn && projectId && result.data?._id) {
+          const savedMappings = localStorage.getItem(`project-${projectId}-columns`);
+          const columnMappings = savedMappings ? JSON.parse(savedMappings) : {};
+          columnMappings[result.data._id] = projectColumn;
+          localStorage.setItem(`project-${projectId}-columns`, JSON.stringify(columnMappings));
+        }
+        
         toast({
           title: "Success",
           description: "Todo created successfully",
