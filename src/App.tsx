@@ -11,6 +11,7 @@ import Today from "./pages/Today";
 import Important from "./pages/Important";
 import Projects from "./pages/Projects";
 import AllTodos from "./pages/AllTodos";
+import Completed from "./pages/Completed";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -34,7 +35,7 @@ const App = () => (
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/important" element={<ProtectedRoute><Important /></ProtectedRoute>} />
           <Route path="/personal" element={<ProtectedRoute><Today /></ProtectedRoute>} />
-          <Route path="/completed" element={<ProtectedRoute><Today /></ProtectedRoute>} />
+          <Route path="/completed" element={<ProtectedRoute><Completed /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
