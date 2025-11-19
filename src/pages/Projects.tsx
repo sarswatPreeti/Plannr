@@ -107,50 +107,51 @@ export default function Projects() {
       <AppSidebar />
 
       <main className="flex-1 overflow-x-auto ml-64">
-        <div className="p-6">
+        <div className="px-6 py-10">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                <span>Project Management</span>
-                <span>/</span>
-                <span className="text-primary">Student Project</span>
+          <div className="mb-12">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <span className="text-3xl leading-none">📋</span>
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Student Project</h1>
-              <p className="text-muted-foreground mt-1">Short description to place here...</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Search task" className="pl-9 w-64" />
+              <div className="flex-1">
+                <h1 className="text-4xl font-bold text-foreground tracking-tight">Projects</h1>
+                <p className="text-sm text-muted-foreground mt-1">Organize your tasks with Kanban boards</p>
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="w-4 h-4" />
-              </Button>
-              <Button onClick={() => setModalOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                New task
-              </Button>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input placeholder="Search task" className="pl-9 w-64 focus:scale-[1.01] transition-transform duration-200" />
+                </div>
+                <Button variant="outline" size="icon" className="hover:scale-105 transition-transform duration-200">
+                  <Filter className="w-4 h-4" />
+                </Button>
+                <Button onClick={() => setModalOpen(true)} className="hover:scale-105 transition-transform duration-200">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Task
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Kanban Board */}
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">Loading projects...</div>
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+              <p className="text-muted-foreground">Loading projects...</p>
+            </div>
           ) : (
             <DndContext
               sensors={sensors}
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
-              <div className="flex gap-4 pb-6">
+              <div className="flex gap-5 pb-6 overflow-x-auto">
                 {columns.map((column) => (
                   <div key={column.id} className="flex-shrink-0 w-80">
-                    <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center justify-between mb-4 bg-muted/30 rounded-xl p-3">
                       <h2 className="font-semibold text-foreground">{column.title}</h2>
-                      <span
-                        className={`${column.color} text-white text-xs font-medium px-2 py-0.5 rounded-full`}
-                      >
+                      <span className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">
                         {getTasksForColumn(column.id).length}
                       </span>
                     </div>
@@ -159,16 +160,27 @@ export default function Projects() {
                       items={getTasksForColumn(column.id).map((t) => t.id)}
                       strategy={verticalListSortingStrategy}
                     >
-                      <div className="space-y-3 min-h-[200px]">
-                        {getTasksForColumn(column.id).map((task) => (
-                          <KanbanCard key={task.id} {...task} />
-                        ))}
+                      <div className="space-y-3 min-h-[200px] bg-muted/10 rounded-xl p-3">
+                        {getTasksForColumn(column.id).length === 0 ? (
+                          <div className="text-center py-8 text-muted-foreground text-sm">
+                            No tasks yet
+                          </div>
+                        ) : (
+                          getTasksForColumn(column.id).map((task) => (
+                            <KanbanCard key={task.id} {...task} />
+                          ))
+                        )}
                       </div>
                     </SortableContext>
 
-                    <Button variant="ghost" className="w-full mt-3" size="sm">
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-3 border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all duration-200" 
+                      size="sm"
+                      onClick={() => setModalOpen(true)}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
-                      Add task
+                      Add Task
                     </Button>
                   </div>
                 ))}
