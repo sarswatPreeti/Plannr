@@ -33,9 +33,12 @@ interface AddTodoModalProps {
   defaultDate?: Date;
   editingTodo?: any;
   defaultPriority?: 'low' | 'medium' | 'high';
+  projectId?: string;
+  defaultStatus?: 'todo' | 'in-progress' | 'review' | 'completed';
+  projectColumn?: string;
 }
 
-export function AddTodoModal({ open, onOpenChange, onSuccess, defaultDate, editingTodo, defaultPriority }: AddTodoModalProps) {
+export function AddTodoModal({ open, onOpenChange, onSuccess, defaultDate, editingTodo, defaultPriority, projectId, defaultStatus, projectColumn }: AddTodoModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<string>("Personal");
@@ -91,6 +94,9 @@ export function AddTodoModal({ open, onOpenChange, onSuccess, defaultDate, editi
         priority: priority as 'low' | 'medium' | 'high',
         dueDate: finalDate.toISOString(),
         completed: editingTodo?.completed || false,
+        status: editingTodo?.status || defaultStatus || 'todo',
+        tags: projectColumn ? [`projectColumn:${projectColumn}`] : [],
+        ...(projectId && { projectId }),
       };
 
       if (editingTodo) {

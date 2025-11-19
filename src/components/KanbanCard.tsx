@@ -48,58 +48,58 @@ export function KanbanCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-card border border-border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+      className="bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2 flex-1">
-          <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
-            <GripVertical className="w-4 h-4 text-muted-foreground" />
+          <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground">
+            <GripVertical className="w-4 h-4" />
           </button>
-          <h3 className="font-medium text-sm text-foreground flex-1">{title}</h3>
+          <h3 className="font-medium text-sm text-foreground flex-1 line-clamp-2">{title}</h3>
         </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6">
+        <Button variant="ghost" size="icon" className="h-6 w-6 -mt-1 -mr-1">
           <MoreHorizontal className="w-4 h-4" />
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground mb-3">{category}</p>
+      <p className="text-xs text-muted-foreground mb-3 px-6">{category}</p>
 
       {subtasks && (
-        <div className="mb-3">
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span>Subtasks</span>
-            <span>{subtasks.completed}/{subtasks.total}</span>
+        <div className="mb-4 px-6">
+          <div className="flex items-center justify-between text-xs mb-2">
+            <span className="text-muted-foreground font-medium">Subtask</span>
+            <span className="text-muted-foreground">{subtasks.completed}/{subtasks.total}</span>
           </div>
-          <Progress value={(subtasks.completed / subtasks.total) * 100} className="h-1.5" />
+          <Progress value={(subtasks.completed / subtasks.total) * 100} className="h-2" />
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Calendar className="w-3 h-3" />
-            <span>{dueDate}</span>
+      <div className="flex items-center justify-between px-6">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-xs">
+            <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-muted-foreground font-medium">{dueDate}</span>
           </div>
           <PriorityBadge priority={priority} />
         </div>
 
         <div className="flex items-center gap-2">
-          {comments && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MessageSquare className="w-3 h-3" />
-              <span>{comments}</span>
+          {comments && comments > 0 && (
+            <div className="flex items-center gap-1 text-xs">
+              <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground">{comments}</span>
             </div>
           )}
-          {attachments && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Paperclip className="w-3 h-3" />
-              <span>{attachments}</span>
+          {attachments && attachments > 0 && (
+            <div className="flex items-center gap-1 text-xs">
+              <Paperclip className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground">{attachments}</span>
             </div>
           )}
           {assignee && (
-            <Avatar className="h-6 w-6">
+            <Avatar className="h-6 w-6 border border-border">
               <AvatarImage src={assignee.avatar} />
-              <AvatarFallback className="text-xs">
+              <AvatarFallback className="text-xs bg-primary/10 text-primary">
                 {assignee.name.split(" ").map(n => n[0]).join("")}
               </AvatarFallback>
             </Avatar>
