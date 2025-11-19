@@ -12,6 +12,9 @@ import Important from "./pages/Important";
 import Projects from "./pages/Projects";
 import AllTodos from "./pages/AllTodos";
 import Completed from "./pages/Completed";
+import Tags from "./pages/Tags";
+import Categories from "./pages/Categories";
+import Category from "./pages/Category";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -30,12 +33,17 @@ const App = () => (
           <Route path="/signup" element={<SignUp />} />
           <Route path="/today" element={<ProtectedRoute><Today /></ProtectedRoute>} />
           <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+          <Route path="/projects/:projectId" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
           <Route path="/all" element={<ProtectedRoute><AllTodos /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/important" element={<ProtectedRoute><Important /></ProtectedRoute>} />
           <Route path="/personal" element={<ProtectedRoute><Today /></ProtectedRoute>} />
           <Route path="/completed" element={<ProtectedRoute><Completed /></ProtectedRoute>} />
+          <Route path="/tags" element={<ProtectedRoute><Tags /></ProtectedRoute>} />
+          <Route path="/tags/:tagId" element={<ProtectedRoute><Tags /></ProtectedRoute>} />
+          <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
+          <Route path="/categories/:categoryName" element={<ProtectedRoute><Category /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
