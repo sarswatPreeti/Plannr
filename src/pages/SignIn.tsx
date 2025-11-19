@@ -64,14 +64,14 @@ export default function SignIn() {
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                 <CheckCircle2 className="w-7 h-7 text-white" />
               </div>
-              <span className="font-bold text-3xl">Rutinitas</span>
+              <span className="font-bold text-3xl">Plannr</span>
             </Link>
             
             <div className="space-y-4">
               <h1 className="text-4xl font-bold">
                 Welcome back to
                 <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Rutinitas
+                  Plannr
                 </span>
               </h1>
               <p className="text-lg text-muted-foreground">

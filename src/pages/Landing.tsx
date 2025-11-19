@@ -92,7 +92,7 @@ export default function Landing() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-xl">Rutinitas</span>
+              <span className="font-bold text-xl">Plannr</span>
             </div>
             <div className="flex items-center gap-4">
               <Button variant="ghost" onClick={() => scrollToSection('features')}>Features</Button>
@@ -121,7 +121,7 @@ export default function Landing() {
             Organize Your Life,<br />Achieve Your Goals
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Rutinitas helps you manage tasks, projects, and daily routines with a beautiful,
+            Plannr helps you manage tasks, projects, and daily routines with a beautiful,
             intuitive interface inspired by the best productivity tools.
           </p>
           <div className="flex gap-4 justify-center">
@@ -232,7 +232,7 @@ export default function Landing() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Join thousands of users who are already managing their tasks better with Rutinitas
+            Join thousands of users who are already managing their tasks better with Plannr
           </p>
           <div className="flex gap-4 justify-center">
             <Link to="/signup">
@@ -254,7 +254,7 @@ export default function Landing() {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                   <CheckCircle2 className="w-5 h-5 text-white" />
                 </div>
-                <span className="font-bold text-lg">Rutinitas</span>
+                <span className="font-bold text-lg">Plannr</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Modern task management for modern teams
@@ -286,7 +286,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-            <p>&copy; 2025 Rutinitas. All rights reserved.</p>
+            <p>&copy; 2025 Plannr. All rights reserved.</p>
           </div>
         </div>
       </footer>

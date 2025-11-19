@@ -1,4 +1,4 @@
-# Rutinitas - Modern Todo Management
+# Plannr - Modern Todo Management
 
 A beautiful, modern todo management app inspired by Notion, Todoist, and Linear. Organize your tasks, projects, and daily routines effortlessly.
 

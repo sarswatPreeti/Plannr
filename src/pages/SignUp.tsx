@@ -86,7 +86,7 @@ export default function SignUp() {
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                 <CheckCircle2 className="w-7 h-7 text-white" />
               </div>
-              <span className="font-bold text-3xl">Rutinitas</span>
+              <span className="font-bold text-3xl">Plannr</span>
             </Link>
             
             <div className="space-y-4">
@@ -97,7 +97,7 @@ export default function SignUp() {
                 </span>
               </h1>
               <p className="text-lg text-muted-foreground">
-                Join thousands of users who are already managing their tasks and projects more efficiently with Rutinitas.
+                Join thousands of users who are already managing their tasks and projects more efficiently with Plannr.
               </p>
             </div>
 

@@ -48,7 +48,7 @@ export default function Settings() {
   const handleThemeChange = async (newTheme: string) => {
     setTheme(newTheme);
     try {
-      await userService.updatePreferences({ theme: newTheme });
+      await userService.updatePreferences({ theme: newTheme as 'light' | 'dark' | 'system' });
       toast({
         title: "Success",
         description: "Theme updated successfully",
@@ -144,7 +144,7 @@ export default function Settings() {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Appearance</CardTitle>
-              <CardDescription>Customize how Rutinitas looks on your device</CardDescription>
+              <CardDescription>Customize how Plannr looks on your device</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
